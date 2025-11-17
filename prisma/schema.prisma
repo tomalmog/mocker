@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id            String      @id @default(cuid())
+  email         String      @unique
+  name          String?
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+  interviews    Interview[]
+}
+
+model Interview {
+  id                String    @id @default(cuid())
+  userId            String
+  user              User      @relation(fields: [userId], references: [id])
+
+  // Interview settings
+  difficulty        String    // easy, medium, hard, random
+  topic             String?   // arrays, trees, graphs, dp, etc.
+  companyStyle      String?   // faang, startup, trading
+  duration          Int       // in minutes
+  communicationMode String    // text, voice, both
+  personality       String    // friendly, neutral, tough
+
+  // Interview data
+  problemTitle      String
+  problemStatement  String
+  testCases         String    // JSON string
+  optimalSolution   String?
+
+  // User's solution
+  userCode          String?
+  language          String?   // python, java, cpp, javascript
+
+  // Session data
+  chatHistory       String    // JSON string
+  hintsUsed         Int       @default(0)
+  hintDetails       String?   // JSON string
+
+  // Timing
+  startedAt         DateTime  @default(now())
+  completedAt       DateTime?
+  timeElapsed       Int?      // in seconds
+
+  // Scoring
+  problemSolving    Int?      // 0-10
+  codeQuality       Int?      // 0-10
+  communication     Int?      // 0-10
+  timeManagement    Int?      // 0-10
+  optimization      Int?      // 0-10
+  overallRating     String?   // strong_pass, weak_pass, no_hire, borderline
+
+  // Feedback
+  whatWentWell      String?   // JSON array
+  areasToImprove    String?   // JSON array
+  detailedFeedback  String?
+
+  createdAt         DateTime  @default(now())
+  updatedAt         DateTime  @updatedAt
+}
