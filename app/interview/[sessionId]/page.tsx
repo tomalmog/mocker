@@ -3,6 +3,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Editor from '@monaco-editor/react';
+import ThemeToggle from '@/app/components/ThemeToggle';
 import type { ChatMessage, Problem, Language } from '@/types/interview';
 
 const LANGUAGE_TEMPLATES = {
@@ -34,32 +35,26 @@ export default function InterviewRoom() {
   }, [sessionId]);
 
   useEffect(() => {
-    // Timer
     const interval = setInterval(() => {
       setTimeElapsed((prev) => prev + 1);
     }, 1000);
-
     return () => clearInterval(interval);
   }, []);
 
   useEffect(() => {
-    // Auto-scroll chat
     chatEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [chatMessages]);
 
   useEffect(() => {
-    // Monitor silence and behavior
     const checkActivity = setInterval(() => {
       const timeSinceLastActivity = Date.now() - lastActivityTime;
       const twoMinutes = 2 * 60 * 1000;
 
       if (timeSinceLastActivity > twoMinutes && chatMessages.length > 0) {
-        // AI should check in
         sendAIMessage('How\'s it going? Want to talk through your approach?');
-        setLastActivityTime(Date.now()); // Reset to avoid spam
+        setLastActivityTime(Date.now());
       }
-    }, 30000); // Check every 30 seconds
-
+    }, 30000);
     return () => clearInterval(checkActivity);
   }, [lastActivityTime, chatMessages.length]);
 
@@ -71,7 +66,6 @@ export default function InterviewRoom() {
       setProblem(data.problem);
       setChatMessages(data.chatHistory || []);
 
-      // Initial greeting from AI
       if (!data.chatHistory || data.chatHistory.length === 0) {
         setTimeout(() => {
           const greeting = getInterviewerGreeting(data.settings?.personality || 'friendly');
@@ -99,10 +93,8 @@ export default function InterviewRoom() {
     let aiMessage: string;
 
     if (message) {
-      // Predefined message
       aiMessage = message;
     } else {
-      // Get AI response based on context
       const response = await fetch('/api/interview/chat', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -130,7 +122,6 @@ export default function InterviewRoom() {
   const handleSendMessage = async () => {
     if (!inputMessage.trim()) return;
 
-    // Add user message
     const userMessage: ChatMessage = {
       role: 'candidate',
       content: inputMessage,
@@ -141,7 +132,6 @@ export default function InterviewRoom() {
     setInputMessage('');
     setLastActivityTime(Date.now());
 
-    // Get AI response
     await sendAIMessage();
   };
 
@@ -164,7 +154,6 @@ export default function InterviewRoom() {
 
       const result = await response.json();
 
-      // Show results in chat
       const resultMessage: ChatMessage = {
         role: 'interviewer',
         content: `Test Results:\n${JSON.stringify(result, null, 2)}`,
@@ -204,31 +193,32 @@ export default function InterviewRoom() {
 
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center min-h-screen bg-slate-900">
-        <div className="text-white text-xl">Loading interview...</div>
+      <div className="flex items-center justify-center min-h-screen bg-white dark:bg-black">
+        <div className="text-black dark:text-white text-lg">Loading interview...</div>
       </div>
     );
   }
 
   return (
-    <div className="flex flex-col h-screen bg-slate-900">
+    <div className="flex flex-col h-screen bg-white dark:bg-black">
       {/* Top Bar */}
-      <div className="flex items-center justify-between px-6 py-3 bg-slate-800 border-b border-slate-700">
+      <div className="flex items-center justify-between px-6 py-3 border-b border-gray-200 dark:border-gray-800">
         <div className="flex items-center gap-4">
-          <h1 className="text-xl font-semibold text-white">Mocker Interview</h1>
-          <div className="text-purple-400 font-mono">{formatTime(timeElapsed)}</div>
+          <h1 className="text-lg font-semibold text-black dark:text-white">Mocker Interview</h1>
+          <div className="text-sm text-gray-600 dark:text-gray-400 font-mono">{formatTime(timeElapsed)}</div>
         </div>
         <div className="flex items-center gap-3">
           <button
             onClick={() => setShowHint(true)}
-            className="px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors"
+            className="px-3 py-1.5 text-sm border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-900 transition-colors disabled:opacity-50"
             disabled={!problem || hintsUsed >= problem.hints.length}
           >
-            Request Hint ({hintsUsed}/{problem?.hints.length || 0})
+            Hint ({hintsUsed}/{problem?.hints.length || 0})
           </button>
+          <ThemeToggle />
           <button
             onClick={handleEndInterview}
-            className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+            className="px-3 py-1.5 text-sm bg-black dark:bg-white text-white dark:text-black rounded-md hover:opacity-90 transition-opacity"
           >
             End Interview
           </button>
@@ -238,17 +228,17 @@ export default function InterviewRoom() {
       {/* Main Content */}
       <div className="flex flex-1 overflow-hidden">
         {/* Left Side - Code Editor (60%) */}
-        <div className="w-[60%] flex flex-col border-r border-slate-700">
-          <div className="flex items-center justify-between px-4 py-2 bg-slate-800 border-b border-slate-700">
-            <div className="flex gap-2">
+        <div className="w-[60%] flex flex-col border-r border-gray-200 dark:border-gray-800">
+          <div className="flex items-center justify-between px-4 py-2 border-b border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+            <div className="flex gap-1">
               {(['python', 'javascript', 'java', 'cpp'] as Language[]).map((lang) => (
                 <button
                   key={lang}
                   onClick={() => handleLanguageChange(lang)}
-                  className={`px-3 py-1 rounded ${
+                  className={`px-3 py-1 text-xs rounded ${
                     language === lang
-                      ? 'bg-purple-600 text-white'
-                      : 'bg-slate-700 text-slate-300 hover:bg-slate-600'
+                      ? 'bg-black dark:bg-white text-white dark:text-black'
+                      : 'text-gray-600 dark:text-gray-400 hover:bg-gray-200 dark:hover:bg-gray-800'
                   }`}
                 >
                   {lang === 'cpp' ? 'C++' : lang.charAt(0).toUpperCase() + lang.slice(1)}
@@ -258,17 +248,17 @@ export default function InterviewRoom() {
             <div className="flex gap-2">
               <button
                 onClick={handleRunCode}
-                className="px-4 py-1 bg-green-600 text-white rounded hover:bg-green-700"
+                className="px-3 py-1 text-xs border border-gray-300 dark:border-gray-700 rounded hover:bg-gray-100 dark:hover:bg-gray-900"
               >
                 Run Code
               </button>
-              <button className="px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700">
-                Submit Solution
+              <button className="px-3 py-1 text-xs bg-black dark:bg-white text-white dark:text-black rounded hover:opacity-90">
+                Submit
               </button>
             </div>
           </div>
 
-          <div className="flex-1">
+          <div className="flex-1 bg-white dark:bg-black">
             <Editor
               height="100%"
               language={language}
@@ -290,57 +280,51 @@ export default function InterviewRoom() {
         </div>
 
         {/* Right Side - Problem & Chat (40%) */}
-        <div className="w-[40%] flex flex-col">
+        <div className="w-[40%] flex flex-col bg-gray-50 dark:bg-gray-950">
           {/* Problem Statement */}
-          <div className="h-1/3 overflow-y-auto px-6 py-4 bg-slate-800 border-b border-slate-700">
+          <div className="h-1/3 overflow-y-auto px-6 py-4 border-b border-gray-200 dark:border-gray-800">
             {problem && (
-              <div className="text-white">
-                <h2 className="text-2xl font-bold mb-4">{problem.title}</h2>
-                <div className="prose prose-invert max-w-none">
-                  <p className="mb-4">{problem.description}</p>
+              <div className="text-sm">
+                <h2 className="text-lg font-semibold text-black dark:text-white mb-3">{problem.title}</h2>
+                <p className="text-gray-700 dark:text-gray-300 mb-4 leading-relaxed">{problem.description}</p>
 
-                  <h3 className="text-lg font-semibold mb-2">Examples:</h3>
-                  {problem.examples.map((example, idx) => (
-                    <div key={idx} className="mb-3 bg-slate-900 p-3 rounded">
-                      <div><strong>Input:</strong> {example.input}</div>
-                      <div><strong>Output:</strong> {example.output}</div>
-                      {example.explanation && (
-                        <div className="text-sm text-slate-400 mt-1">
-                          {example.explanation}
-                        </div>
-                      )}
-                    </div>
+                <h3 className="text-sm font-semibold text-black dark:text-white mb-2">Examples:</h3>
+                {problem.examples.map((example, idx) => (
+                  <div key={idx} className="mb-3 bg-white dark:bg-black border border-gray-200 dark:border-gray-800 p-3 rounded text-xs">
+                    <div className="mb-1"><span className="font-medium">Input:</span> {example.input}</div>
+                    <div className="mb-1"><span className="font-medium">Output:</span> {example.output}</div>
+                    {example.explanation && (
+                      <div className="text-gray-600 dark:text-gray-400 mt-1">{example.explanation}</div>
+                    )}
+                  </div>
+                ))}
+
+                <h3 className="text-sm font-semibold text-black dark:text-white mb-2">Constraints:</h3>
+                <ul className="list-disc list-inside text-gray-700 dark:text-gray-300 space-y-1">
+                  {problem.constraints.map((constraint, idx) => (
+                    <li key={idx} className="text-xs">{constraint}</li>
                   ))}
-
-                  <h3 className="text-lg font-semibold mb-2">Constraints:</h3>
-                  <ul className="list-disc list-inside">
-                    {problem.constraints.map((constraint, idx) => (
-                      <li key={idx}>{constraint}</li>
-                    ))}
-                  </ul>
-                </div>
+                </ul>
               </div>
             )}
           </div>
 
           {/* Chat Interface */}
-          <div className="flex-1 flex flex-col bg-slate-900">
+          <div className="flex-1 flex flex-col">
             <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3">
               {chatMessages.map((message, idx) => (
                 <div
                   key={idx}
-                  className={`flex ${
-                    message.role === 'candidate' ? 'justify-end' : 'justify-start'
-                  }`}
+                  className={`flex ${message.role === 'candidate' ? 'justify-end' : 'justify-start'}`}
                 >
                   <div
-                    className={`max-w-[80%] px-4 py-2 rounded-lg ${
+                    className={`max-w-[85%] px-3 py-2 rounded-lg text-sm ${
                       message.role === 'candidate'
-                        ? 'bg-purple-600 text-white'
-                        : 'bg-slate-700 text-white'
+                        ? 'bg-black dark:bg-white text-white dark:text-black'
+                        : 'bg-white dark:bg-black border border-gray-200 dark:border-gray-800 text-gray-900 dark:text-gray-100'
                     }`}
                   >
-                    <div className="text-sm mb-1 opacity-70">
+                    <div className="text-xs mb-1 opacity-70">
                       {message.role === 'candidate' ? 'You' : 'Alex'}
                     </div>
                     <div className="whitespace-pre-wrap">{message.content}</div>
@@ -351,7 +335,7 @@ export default function InterviewRoom() {
             </div>
 
             {/* Input */}
-            <div className="px-4 py-3 bg-slate-800 border-t border-slate-700">
+            <div className="px-4 py-3 border-t border-gray-200 dark:border-gray-800">
               <div className="flex gap-2">
                 <input
                   type="text"
@@ -359,11 +343,11 @@ export default function InterviewRoom() {
                   onChange={(e) => setInputMessage(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
                   placeholder="Type your message..."
-                  className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-purple-500"
+                  className="flex-1 px-3 py-2 text-sm bg-white dark:bg-black border border-gray-300 dark:border-gray-700 rounded-md focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white"
                 />
                 <button
                   onClick={handleSendMessage}
-                  className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700"
+                  className="px-4 py-2 text-sm bg-black dark:bg-white text-white dark:text-black rounded-md hover:opacity-90"
                 >
                   Send
                 </button>
@@ -375,22 +359,22 @@ export default function InterviewRoom() {
 
       {/* Hint Modal */}
       {showHint && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-          <div className="bg-slate-800 rounded-lg p-6 max-w-md">
-            <h3 className="text-xl font-semibold text-white mb-4">Request a Hint?</h3>
-            <p className="text-slate-300 mb-6">
+        <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+          <div className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-6 max-w-md mx-4">
+            <h3 className="text-lg font-semibold text-black dark:text-white mb-3">Request a Hint?</h3>
+            <p className="text-sm text-gray-600 dark:text-gray-400 mb-6">
               Requesting a hint will affect your final score. Are you sure you want to proceed?
             </p>
             <div className="flex gap-3">
               <button
                 onClick={() => setShowHint(false)}
-                className="flex-1 px-4 py-2 bg-slate-700 text-white rounded-lg hover:bg-slate-600"
+                className="flex-1 px-4 py-2 text-sm border border-gray-300 dark:border-gray-700 rounded-md hover:bg-gray-50 dark:hover:bg-gray-900"
               >
                 Cancel
               </button>
               <button
                 onClick={handleRequestHint}
-                className="flex-1 px-4 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700"
+                className="flex-1 px-4 py-2 text-sm bg-black dark:bg-white text-white dark:text-black rounded-md hover:opacity-90"
               >
                 Get Hint
               </button>

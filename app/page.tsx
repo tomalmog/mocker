@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import ThemeToggle from './components/ThemeToggle';
 import type { Difficulty, Topic, CompanyStyle, CommunicationMode, Personality } from '@/types/interview';
 
 export default function Home() {
@@ -16,7 +17,6 @@ export default function Home() {
   });
 
   const handleStartInterview = async () => {
-    // Create interview session
     const response = await fetch('/api/interview/start', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -28,41 +28,59 @@ export default function Home() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-purple-900 to-slate-900">
-      <div className="container mx-auto px-4 py-16">
+    <div className="min-h-screen bg-white dark:bg-black transition-colors">
+      {/* Header */}
+      <header className="border-b border-gray-200 dark:border-gray-800">
+        <div className="container mx-auto px-6 py-4 flex items-center justify-between">
+          <h1 className="text-xl font-semibold text-black dark:text-white">Mocker</h1>
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => router.push('/dashboard')}
+              className="text-sm text-gray-600 dark:text-gray-400 hover:text-black dark:hover:text-white transition-colors"
+            >
+              Dashboard
+            </button>
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
+
+      <main className="container mx-auto px-6 py-16">
         <div className="max-w-4xl mx-auto">
-          {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-6xl font-bold text-white mb-4">
-              Mocker
-            </h1>
-            <p className="text-xl text-purple-200">
-              AI-Powered Mock Technical Interviews
-            </p>
-            <p className="text-lg text-purple-300 mt-2">
-              Practice like it's the real thing. Interview at Google, but in your pajamas.
+          {/* Hero Section */}
+          <div className="text-center mb-16">
+            <h2 className="text-5xl md:text-6xl font-bold text-black dark:text-white mb-6">
+              AI-Powered Mock
+              <br />
+              Technical Interviews
+            </h2>
+            <p className="text-lg text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
+              Practice coding interviews with an AI interviewer that behaves like a human.
+              Get instant feedback and improve your skills.
             </p>
           </div>
 
           {/* Settings Card */}
-          <div className="bg-white/10 backdrop-blur-lg rounded-2xl p-8 shadow-2xl border border-white/20">
-            <h2 className="text-2xl font-semibold text-white mb-6">Interview Settings</h2>
+          <div className="bg-white dark:bg-gray-950 border border-gray-200 dark:border-gray-800 rounded-lg p-8 shadow-sm">
+            <h3 className="text-lg font-semibold text-black dark:text-white mb-6">
+              Configure Your Interview
+            </h3>
 
             <div className="space-y-6">
               {/* Difficulty */}
               <div>
-                <label className="block text-sm font-medium text-purple-200 mb-2">
-                  Difficulty
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Difficulty Level
                 </label>
-                <div className="grid grid-cols-4 gap-3">
+                <div className="grid grid-cols-4 gap-2">
                   {(['easy', 'medium', 'hard', 'random'] as Difficulty[]).map((level) => (
                     <button
                       key={level}
                       onClick={() => setSettings({ ...settings, difficulty: level })}
-                      className={`py-2 px-4 rounded-lg font-medium transition-all ${
+                      className={`py-2 px-4 rounded-md border transition-all text-sm font-medium ${
                         settings.difficulty === level
-                          ? 'bg-purple-600 text-white shadow-lg scale-105'
-                          : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                          ? 'border-black dark:border-white bg-black dark:bg-white text-white dark:text-black'
+                          : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600'
                       }`}
                     >
                       {level.charAt(0).toUpperCase() + level.slice(1)}
@@ -73,13 +91,13 @@ export default function Home() {
 
               {/* Topic Focus */}
               <div>
-                <label className="block text-sm font-medium text-purple-200 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Topic Focus
                 </label>
                 <select
                   value={settings.topic}
                   onChange={(e) => setSettings({ ...settings, topic: e.target.value as Topic })}
-                  className="w-full py-3 px-4 rounded-lg bg-white/10 text-white border border-white/20 focus:border-purple-400 focus:outline-none focus:ring-2 focus:ring-purple-400"
+                  className="w-full py-2.5 px-4 rounded-md border border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-900 dark:text-gray-100 focus:outline-none focus:ring-2 focus:ring-black dark:focus:ring-white transition-shadow"
                 >
                   <option value="surprise">Surprise Me</option>
                   <option value="arrays">Arrays</option>
@@ -94,18 +112,18 @@ export default function Home() {
 
               {/* Company Style */}
               <div>
-                <label className="block text-sm font-medium text-purple-200 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Company Style
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   {(['faang', 'startup', 'trading'] as CompanyStyle[]).map((style) => (
                     <button
                       key={style}
                       onClick={() => setSettings({ ...settings, companyStyle: style })}
-                      className={`py-2 px-4 rounded-lg font-medium transition-all ${
+                      className={`py-2 px-4 rounded-md border transition-all text-sm font-medium ${
                         settings.companyStyle === style
-                          ? 'bg-purple-600 text-white shadow-lg scale-105'
-                          : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                          ? 'border-black dark:border-white bg-black dark:bg-white text-white dark:text-black'
+                          : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600'
                       }`}
                     >
                       {style === 'faang' ? 'FAANG' : style.charAt(0).toUpperCase() + style.slice(1)}
@@ -116,8 +134,8 @@ export default function Home() {
 
               {/* Duration */}
               <div>
-                <label className="block text-sm font-medium text-purple-200 mb-2">
-                  Interview Length: {settings.duration} minutes
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
+                  Duration: {settings.duration} minutes
                 </label>
                 <input
                   type="range"
@@ -126,9 +144,9 @@ export default function Home() {
                   step="15"
                   value={settings.duration}
                   onChange={(e) => setSettings({ ...settings, duration: parseInt(e.target.value) })}
-                  className="w-full h-2 bg-white/20 rounded-lg appearance-none cursor-pointer accent-purple-600"
+                  className="w-full h-2 bg-gray-200 dark:bg-gray-800 rounded-lg appearance-none cursor-pointer accent-black dark:accent-white"
                 />
-                <div className="flex justify-between text-sm text-purple-300 mt-1">
+                <div className="flex justify-between text-xs text-gray-500 dark:text-gray-500 mt-2">
                   <span>30 min</span>
                   <span>45 min</span>
                   <span>60 min</span>
@@ -137,18 +155,18 @@ export default function Home() {
 
               {/* Communication Mode */}
               <div>
-                <label className="block text-sm font-medium text-purple-200 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Communication Mode
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   {(['text', 'voice', 'both'] as CommunicationMode[]).map((mode) => (
                     <button
                       key={mode}
                       onClick={() => setSettings({ ...settings, communicationMode: mode })}
-                      className={`py-2 px-4 rounded-lg font-medium transition-all ${
+                      className={`py-2 px-4 rounded-md border transition-all text-sm font-medium ${
                         settings.communicationMode === mode
-                          ? 'bg-purple-600 text-white shadow-lg scale-105'
-                          : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                          ? 'border-black dark:border-white bg-black dark:bg-white text-white dark:text-black'
+                          : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600'
                       }`}
                     >
                       {mode.charAt(0).toUpperCase() + mode.slice(1)}
@@ -159,18 +177,18 @@ export default function Home() {
 
               {/* Interviewer Personality */}
               <div>
-                <label className="block text-sm font-medium text-purple-200 mb-2">
+                <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-3">
                   Interviewer Personality
                 </label>
-                <div className="grid grid-cols-3 gap-3">
+                <div className="grid grid-cols-3 gap-2">
                   {(['friendly', 'neutral', 'tough'] as Personality[]).map((p) => (
                     <button
                       key={p}
                       onClick={() => setSettings({ ...settings, personality: p })}
-                      className={`py-2 px-4 rounded-lg font-medium transition-all ${
+                      className={`py-2 px-4 rounded-md border transition-all text-sm font-medium ${
                         settings.personality === p
-                          ? 'bg-purple-600 text-white shadow-lg scale-105'
-                          : 'bg-white/10 text-purple-100 hover:bg-white/20'
+                          ? 'border-black dark:border-white bg-black dark:bg-white text-white dark:text-black'
+                          : 'border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-950 text-gray-700 dark:text-gray-300 hover:border-gray-400 dark:hover:border-gray-600'
                       }`}
                     >
                       {p.charAt(0).toUpperCase() + p.slice(1)}
@@ -183,38 +201,67 @@ export default function Home() {
             {/* Start Button */}
             <button
               onClick={handleStartInterview}
-              className="w-full mt-8 py-4 px-8 bg-gradient-to-r from-purple-600 to-pink-600 text-white text-lg font-semibold rounded-xl shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-200"
+              className="w-full mt-8 py-3 px-6 bg-black dark:bg-white text-white dark:text-black font-medium rounded-md hover:opacity-90 transition-opacity"
             >
-              Start Mock Interview
+              Start Interview
             </button>
           </div>
 
           {/* Features */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-12">
-            <div className="bg-white/5 backdrop-blur rounded-xl p-6 border border-white/10">
-              <div className="text-3xl mb-3">🎯</div>
-              <h3 className="text-lg font-semibold text-white mb-2">Dynamic Problems</h3>
-              <p className="text-purple-200 text-sm">
-                Every problem is unique and generated fresh - no memorization
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-16">
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center border border-gray-200 dark:border-gray-800">
+                <svg className="w-6 h-6 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-black dark:text-white mb-2">
+                Dynamic Problems
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Unique questions generated fresh for each interview
               </p>
             </div>
-            <div className="bg-white/5 backdrop-blur rounded-xl p-6 border border-white/10">
-              <div className="text-3xl mb-3">🤖</div>
-              <h3 className="text-lg font-semibold text-white mb-2">Human-Like AI</h3>
-              <p className="text-purple-200 text-sm">
-                AI interviewer that reads your behavior and responds naturally
+
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center border border-gray-200 dark:border-gray-800">
+                <svg className="w-6 h-6 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-black dark:text-white mb-2">
+                Human-Like AI
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Interviewer that reads behavior and responds naturally
               </p>
             </div>
-            <div className="bg-white/5 backdrop-blur rounded-xl p-6 border border-white/10">
-              <div className="text-3xl mb-3">📊</div>
-              <h3 className="text-lg font-semibold text-white mb-2">Detailed Feedback</h3>
-              <p className="text-purple-200 text-sm">
-                Get comprehensive analysis and personalized improvement tips
+
+            <div className="text-center">
+              <div className="w-12 h-12 mx-auto mb-4 bg-gray-100 dark:bg-gray-900 rounded-lg flex items-center justify-center border border-gray-200 dark:border-gray-800">
+                <svg className="w-6 h-6 text-black dark:text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+              </div>
+              <h3 className="text-sm font-semibold text-black dark:text-white mb-2">
+                Detailed Feedback
+              </h3>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Comprehensive analysis with actionable insights
               </p>
             </div>
           </div>
         </div>
-      </div>
+      </main>
+
+      {/* Footer */}
+      <footer className="border-t border-gray-200 dark:border-gray-800 mt-20">
+        <div className="container mx-auto px-6 py-6">
+          <p className="text-center text-sm text-gray-500 dark:text-gray-500">
+            Built with Claude AI and Next.js
+          </p>
+        </div>
+      </footer>
     </div>
   );
 }
